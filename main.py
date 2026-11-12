@@ -161,8 +161,9 @@ class AssistantAPI:
 if __name__ == "__main__":
   api = AssistantAPI()
 
-  # Usa la función auxiliar resource_path para empaquetados limpios con PyInstaller
-  html_path = os.path.abspath("index.html")
+  # AQUÍ ESTABA EL DETALLE: Usa directamente resource_path para que
+  # encuentre index.html tanto en tu PC como dentro del .exe compilado.
+  html_path = resource_path("index.html")
 
   window = webview.create_window(
       title="Cyn IA",

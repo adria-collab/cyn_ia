@@ -8,3 +8,9 @@ ADVERTENCIA: Solamente Ejecuta lo que se te esta pidiendo, evita modificar los a
 
 
 (Para dar a conocer fallos, bugs o problemas de la IA puede escribirme a mi red social de tiktok: SD-Haise @designacion_serial_h)
+
+Requisitos
+- Python 3.x instalado en tu sistema.
+- Las librerías necesarias:
+  ```bash
+  pip install pywebview requests beautifulsoup4
