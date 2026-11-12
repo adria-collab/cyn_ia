@@ -1,0 +1,10 @@
+Para iniciar la IA debes ir a la carpeta de dist ahy se encuentra el ejetutable de la IA (si de cuasualidad no aparece el ejectable o no funciona has lo siguiente del punto 1 0 2 dependiende de tu sistema operativo) para entrar en las terminal de los archivos primero abra el visual studo code con la carpeta de la IA abierta, luego baya a los tres puntos de la parte de arriba que esta al lado de Run y luego seleccione terminal y nueva terminal y ahy ejecute uno de los siguientes comandos
+
+1- Para Linux (esto hara que se pueda instar el programa de la IA para linux esto debe ejecutarse en la terminal de visual studio code): python3 -m PyInstaller --noconsole --onefile --add-data "index.html:." --add-data "avatar.jpeg:." main.py
+
+2- Para Windows (esto hara que se pueda instar el programa de la IA para windows esto debe ejecutarse en la terminal de visual studio code): python -m PyInstaller --noconsole --onefile --icon="icono.ico" --add-data "index.html;." --add-data "avatar.jpeg;." main.py
+
+ADVERTENCIA: Solamente Ejecuta lo que se te esta pidiendo, evita modificar los archivo de la IA de lo contrario podria dejar de funcioar o podria mover cosas que no quiera
+
+
+(Para dar a conocer fallos, bugs o problemas de la IA puede escribirme a mi red social de tiktok: SD-Haise @designacion_serial_h)

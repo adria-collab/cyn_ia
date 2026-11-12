@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Cyn IA</title>
+    <style>
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #ffff00 0%, #ffff00 100%);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #avatar-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        #avatar-img {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #e94560;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .avatar-title {
+            color: rgb(2, 2, 2);
+            margin-top: 10px;
+            font-weight: 600;
+            font-size: 1.1em;
+            letter-spacing: 1px;
+        }
+        
+        #chat-container {
+            width: 85%;
+            max-width: 600px;
+            background: rgba(161, 161, 160, 0.85);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgb(0, 0, 0);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #messages {
+            height: 130px;
+            overflow-y: auto;
+            font-size: 0.9em;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-right: 5px;
+        }
+
+        .input-box {
+            display: flex;
+            gap: 8px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            outline: none;
+            background: rgba(255, 255, 255, 0.45);
+            color: rgb(0, 0, 0);
+        }
+
+        input[type="text"]::placeholder {
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        button {
+            padding: 10px 16px;
+            border: none;
+            background: #e94560;
+            color: rgb(0, 0, 0);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        button:hover { 
+            background: #0f3460; 
+            color: white;
+        }
+
+        /* Panel para enseñar nuevas respuestas desde la UI */
+        #teach-panel {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.25);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.85em;
+        }
+
+        #teach-panel.active {
+            display: flex;
+        }
+
+        .teach-row {
+            display: flex;
+            gap: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="avatar-container">
+        <img id="avatar-img" src="avatar.jpeg" alt="Asistente">
+        <div class="avatar-title">Cyn Activada</div>
+    </div>
+
+    <div id="chat-container">
+        <div id="messages">
+            <div><b>Cyn:</b> ¡Hola amo, porque no me dejas ver tu corazon?! Escribe "abrir steam", "qué hora es" o consúltame algo.</div>
+        </div>
+
+        <!-- Panel oculto para programar preguntas rápidas -->
+        <div id="teach-panel">
+            <b>Programar nueva respuesta rápida:</b>
+            <div class="teach-row">
+                <input type="text" id="newQuestion" placeholder="Si yo digo... (ej: estado del sistema)">
+                <input type="text" id="newAnswer" placeholder="Cyn responde... (ej: Todo en orden)">
+                <button onclick="saveCustomQA()">Guardar</button>
+            </div>
+        </div>
+
+        <div class="input-box">
+            <input type="text" id="userInput" placeholder="Escribe aquí..." onkeydown="if(event.key==='Enter') sendMessage()">
+            <button onclick="sendMessage()">Enviar</button>
+            <button onclick="toggleTeachPanel()" title="Programar nueva respuesta">+</button>
+        </div>
+    </div>
+
+    <script>
+        // Respuestas programadas directamente en el navegador (se guardan en localStorage)
+        let localQA = JSON.parse(localStorage.getItem('cyn_custom_qa')) || {
+            "hola": "Hola. ¿Qué necesitas ejecutar hoy?",
+            "quien eres": "Soy Cyn, tu asistente Personal."
+        };
+
+        function toggleTeachPanel() {
+            document.getElementById('teach-panel').classList.toggle('active');
+        }
+
+        function saveCustomQA() {
+            const q = document.getElementById('newQuestion').value.trim().toLowerCase();
+            const a = document.getElementById('newAnswer').value.trim();
+
+            if (!q || !a) return;
+
+            localQA[q] = a;
+            localStorage.setItem('cyn_custom_qa', JSON.stringify(localQA));
+
+            document.getElementById('newQuestion').value = '';
+            document.getElementById('newAnswer').value = '';
+            toggleTeachPanel();
+            addMessage('Sistema', `Aprendido: cuando digas "${q}", responderé "${a}".`);
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            addMessage('Tú', message);
+            input.value = '';
+
+            const msgLower = message.toLowerCase();
+
+            // 1. Primero revisa si es una respuesta guardada desde el botón "+"
+            for (const [pregunta, respuesta] of Object.entries(localQA)) {
+                if (msgLower.includes(pregunta)) {
+                    addMessage('Cyn', respuesta);
+                    return;
+                }
+            }
+
+            // 2. Si no está en las rápidas, se lo envía a Python (para abrir programas o lógica avanzada)
+            if (window.pywebview) {
+                window.pywebview.api.send_message(message).then(response => {
+                    addMessage('Cyn', response);
+                });
+            } else {
+                addMessage('Sistema', 'Modo vista previa (sin Python activo). Usa el botón "+" para programar respuestas aquí.');
+            }
+        }
+
+        function addMessage(sender, text) {
+            const messagesDiv = document.getElementById('messages');
+            const msgEl = document.createElement('div');
+            msgEl.innerHTML = `<b>${sender}:</b> ${text}`;
+            messagesDiv.appendChild(msgEl);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+    </script>
+</body>
+</html>

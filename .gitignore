@@ -1,0 +1,14 @@
+# Entornos virtuales
+venv/
+env/
+__pycache__/
+
+# Archivos compilados de Python
+*.pyc
+*.pyo
+*.pyd
+
+# Carpetas de PyInstaller (si empaquetas tu app)
+build/
+dist/
+*.spec
